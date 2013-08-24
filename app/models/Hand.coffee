@@ -3,10 +3,20 @@ class window.Hand extends Backbone.Collection
   model: Card
 
   initialize: (array, @deck, @isDealer) ->
+    
+  hit: -> 
+          @add(@deck.pop()).last()
+          if @bust() 
+            @trigger 'bust', @
+          # @hasBlackJack()
 
-  hit: -> @add(@deck.pop()).last()
+  stand: ->
+    console.log('stand')
+    @trigger 'switchControl', @
 
+          
   scores: ->
+
     # The scores are an array of potential scores.
     # Usually, that array contains one element. That is the only score.
     # when there is an ace, it offers you two scores - the original score, and score + 10.
@@ -17,3 +27,12 @@ class window.Hand extends Backbone.Collection
       score + if card.get 'revealed' then card.get 'value' else 0
     , 0
     if hasAce then [score, score + 10] else [score]
+  
+  hasBlackJack: -> 
+    if @scores().length > 1 and (@scores()[0] is 21 or @scores[1] is 21)
+      @trigger 'blackjack', @ 
+      console.log('blackjack')
+
+  bust: ->
+    return _.every @scores(), (score) ->
+      return score > 21
